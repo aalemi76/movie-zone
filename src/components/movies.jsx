@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Pagination from "./pagination";
 import { getMovies } from "../services/movieService";
+import { paginate } from "../utils/paginate";
 
 class Movies extends Component {
   state = {
@@ -14,8 +15,9 @@ class Movies extends Component {
   };
   render() {
     const { length: count } = this.state.movies;
-    const { movies: movies, headers: headers } = this.state;
-    const { pageSize: pageSize, currentPage: currentPage } = this.state;
+    const { headers: headers } = this.state;
+    const { pageSize, currentPage } = this.state;
+    const movies = paginate(this.state.movies, currentPage, pageSize);
     if (count === 0) return <p>There are no movies in the database!</p>;
     return (
       <React.Fragment>
@@ -32,7 +34,7 @@ class Movies extends Component {
           </thead>
           <tbody>
             {movies.map((movie) => (
-              <tr>
+              <tr key={movie._id}>
                 <th scope="row">{movie.title}</th>
                 <th scope="row">{movie.genre.name}</th>
                 <th scope="row">{movie.numberInStock}</th>
