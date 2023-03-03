@@ -9,12 +9,12 @@ const GenresList = ({
 }) => {
   return (
     <ul className="list-group">
-      {genres.map((value) => (
+      {genres.map((value, index) => (
         <li
           onClick={() => onSelect(value)}
-          key={value[idPropName]}
+          key={index}
           className={
-            value[textPropName] === currentGenre
+            value[textPropName] === currentGenre[textPropName]
               ? "list-group-item active"
               : "list-group-item"
           }
