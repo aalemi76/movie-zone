@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import Pagination from "./pagination";
 import GenresList from "./genresList";
-import { getMovies } from "../services/movieService";
-import { getGenres } from "../services/genreSrvice";
 import { paginate } from "../utils/paginate";
+import DBManager from "../utils/dbManager";
 import MoviesTable from "./moviesTable";
 
 class Movies extends Component {
@@ -11,14 +10,18 @@ class Movies extends Component {
     movies: [],
     genres: [],
     currentGenre: null,
-    headers: ["Title", "Genre", "Stock", "Rate", "", ""],
+    headers: DBManager.shared.headers,
+    sortCol: DBManager.shared.headers[0],
+    isAscending: true,
     pageSize: 4,
     currentPage: 1,
   };
   componentDidMount() {
-    const genres = [{ name: "All" }, ...getGenres()];
-    this.setState({ movies: getMovies(), genres: genres });
-    this.setState({ currentGenre: genres[0] });
+    this.setState({
+      movies: DBManager.shared.movies,
+      genres: DBManager.shared.genres,
+      currentGenre: DBManager.shared.genres[0],
+    });
   }
   handlePageChange = (page) => {
     this.setState({ currentPage: page });
@@ -40,8 +43,22 @@ class Movies extends Component {
     });
     this.setState({ movies: movies });
   };
+  handleSort = (header) => {
+    const isAscending =
+      header.name !== this.state.sortCol.name ? true : !this.state.isAscending;
+    this.setState({ isAscending: isAscending });
+    this.setState({ sortCol: header });
+  };
   render() {
-    const { genres, headers, currentGenre, pageSize, currentPage } = this.state;
+    const {
+      genres,
+      headers,
+      sortCol,
+      isAscending,
+      currentGenre,
+      pageSize,
+      currentPage,
+    } = this.state;
     let movies =
       currentGenre && currentGenre._id
         ? this.state.movies.filter(
@@ -49,7 +66,8 @@ class Movies extends Component {
           )
         : this.state.movies;
     if (movies.length === 0) return <p>There are no movies in the database!</p>;
-    const paginatedMovies = paginate(movies, currentPage, pageSize);
+    const orderedMovies = DBManager.shared.sort(movies, sortCol, isAscending);
+    const paginatedMovies = paginate(orderedMovies, currentPage, pageSize);
     return (
       <div className="row">
         <div className="col-3">
@@ -66,8 +84,9 @@ class Movies extends Component {
           <MoviesTable
             movies={paginatedMovies}
             headers={headers}
-            onLikeStatusChange={(movie) => this.handleLike(movie)}
-            onDelete={(movie) => this.handleDelete(movie)}
+            onLikeStatusChange={this.handleLike}
+            onDelete={this.handleDelete}
+            onSort={this.handleSort}
           />
           <Pagination
             count={movies.length}

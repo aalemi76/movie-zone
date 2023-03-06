@@ -1,14 +1,20 @@
 import React from "react";
 import Like from "./like";
 
-const MoviesTable = ({ movies, headers, onLikeStatusChange, onDelete }) => {
+const MoviesTable = ({
+  movies,
+  headers,
+  onLikeStatusChange,
+  onDelete,
+  onSort,
+}) => {
   return (
     <table className="table">
       <thead>
         <tr>
           {headers.map((value, index) => (
-            <th key={index} scope="col">
-              {value}
+            <th key={index} scope="col" onClick={() => onSort(value)}>
+              {value.name}
             </th>
           ))}
         </tr>
